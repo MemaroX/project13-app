@@ -7,17 +7,17 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #0A0E14;
-            --card-dark: #151921;
-            --cyan-accent: #00E5FF;
-            --red-emergency: #FF1744;
+            --bg-dark: #ffffff;
+            --card-dark: #d6d6d6d8;
+            --cyan-accent: #000000;
+            --red-emergency: #000000;
             --gold-light: #FFC400;
         }
 
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--bg-dark);
-            color: white;
+            color: rgb(6, 6, 6);
             margin: 0;
             padding: 20px;
             display: flex;
@@ -39,11 +39,11 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 30px;
             position: relative;
-            box-shadow: 0 0 50px rgba(0, 229, 255, 0.1);
+            box-shadow: 0 0 30px rgba(215, 210, 210, 0.596);
         }
 
         .room {
-            background: #1C222D;
+            background: #6593f5;
             border-radius: 20px;
             padding: 20px;
             text-align: center;
@@ -53,14 +53,14 @@
 
         /* LIGHT: ON State */
         .room.light-on {
-            background: radial-gradient(circle, #2C3540 0%, #1C222D 100%);
+            background: radial-gradient(circle, #1ddf3d 0%, #1C222D 100%);
             box-shadow: 0 0 30px var(--gold-light);
             border-color: var(--gold-light);
         }
         .light-on i { color: var(--gold-light) !important; text-shadow: 0 0 20px var(--gold-light); }
 
         /* DOOR: States */
-        .room.door-unlocked i { color: #00FF88 !important; }
+        .room.door-unlocked i { color: #2C3540 !important; }
         .room.door-locked i { color: var(--red-emergency) !important; }
 
         /* FAN: Animation */
@@ -72,7 +72,7 @@
             to { transform: rotate(360deg); }
         }
 
-        .icon-box { font-size: 4rem; margin-bottom: 20px; color: #444; }
+        .icon-box { font-size: 4rem; margin-bottom: 20px; color: #0a0a0a; }
 
         .status-badge {
             display: inline-block;
@@ -111,8 +111,8 @@
             right: 20px;
             font-size: 14px;
             font-weight: bold;
-            color: #FF1744;
-            background: rgba(0,0,0,0.5);
+            color: #000000;
+            background: rgb(128, 159, 253);
             padding: 10px 20px;
             border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.1);
