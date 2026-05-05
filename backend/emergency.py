@@ -1,7 +1,7 @@
 import asyncio
 from telegram import Bot
 
-# Note: Keep your token secret! 
+ 
 TOKEN = '8603083667:AAFaHCubBGTA3f93KKcovmErNK8kqI4nWJ4'
 
 # Corrected dictionary name and content
