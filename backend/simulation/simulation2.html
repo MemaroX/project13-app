@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual House Simulator</title>
+    <title>Virtual House Simulator - Dark Mode</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #ffffff;
-            --card-dark: #d6d6d6d8;
-            --cyan-accent: #000000;
-            --red-emergency: #000000;
+            --red-emergency: #EF4444;
             --gold-light: #FFC400;
         }
 
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-dark);
-            color: rgb(6, 6, 6);
+            background: linear-gradient(180deg, #0f172a 0%, #090d16 50%, #020617 100%);
+            color: #f8fafc;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -26,62 +23,81 @@
             min-height: 100vh;
         }
 
-        h1 { color: var(--cyan-accent); margin-bottom: 30px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
+        h1 { 
+            color: #ffffff; 
+            margin-bottom: 30px; 
+            letter-spacing: 2px; 
+            text-align: center;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            font-weight: 700;
+        }
 
         .house-container {
             width: 80%;
             max-width: 900px;
-            background: var(--card-dark);
-            border: 2px solid var(--cyan-accent);
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            border: 1.5px solid #d4af37;
             border-radius: 30px;
             padding: 40px;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 30px;
             position: relative;
-            box-shadow: 0 0 30px rgba(215, 210, 210, 0.596);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7);
         }
 
         .room {
-            background: #6593f5;
+            background: #ffffff;
             border-radius: 20px;
-            padding: 20px;
+            padding: 25px;
             text-align: center;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #0f172a;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .room h3 {
+            color: #0f172a;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 700;
         }
 
         /* LIGHT: ON State */
         .room.light-on {
-            background: radial-gradient(circle, #1ddf3d 0%, #1C222D 100%);
-            box-shadow: 0 0 30px var(--gold-light);
+            background: radial-gradient(circle, #fef08a 0%, #ffffff 100%);
+            box-shadow: 0 0 35px var(--gold-light);
             border-color: var(--gold-light);
         }
-        .light-on i { color: var(--gold-light) !important; text-shadow: 0 0 20px var(--gold-light); }
+        .light-on i { color: #d97706 !important; text-shadow: 0 0 15px var(--gold-light); }
 
         /* DOOR: States */
-        .room.door-unlocked i { color: #2C3540 !important; }
+        .room.door-unlocked i { color: #0f172a !important; }
         .room.door-locked i { color: var(--red-emergency) !important; }
 
         /* FAN: Animation */
         .fan-icon { display: inline-block; }
-        .fan-on .fan-icon { animation: spin 1s linear infinite; color: var(--cyan-accent) !important; }
+        .fan-on .fan-icon { animation: spin 1s linear infinite; color: #0f172a !important; }
 
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        .icon-box { font-size: 4rem; margin-bottom: 20px; color: #0a0a0a; }
+        .icon-box { font-size: 3.5rem; margin-bottom: 15px; color: #0f172a; }
 
         .status-badge {
             display: inline-block;
-            padding: 5px 15px;
+            padding: 6px 16px;
             border-radius: 15px;
             font-size: 12px;
             font-weight: bold;
-            background: rgba(255, 255, 255, 0.1);
+            background: #f1f5f9;
+            color: #334155;
             margin-top: 10px;
+            border: 1px solid #cbd5e1;
         }
 
         /* Door Animation */
@@ -109,19 +125,21 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
-            color: #000000;
-            background: rgb(128, 159, 253);
-            padding: 10px 20px;
+            color: #EF4444;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 8px 20px;
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 101;
         }
     </style>
 </head>
 <body>
     <div id="emergency-overlay"></div>
-    <div id="ws-status">BRAIN OFFLINE</div>
+    <div id="ws-status">Brain Disconnect</div>
     
     <h1>Virtual House Simulator</h1>
 
@@ -163,42 +181,30 @@
         let ws;
 
         function connect() {
-            // Using explicit 127.0.0.1 to avoid localhost IPv6 resolution issues on some machines
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const host = window.location.host; // This will capture 127.0.0.1:8080 or localhost:8080
+            const host = window.location.host; 
             
-            console.log(`Connecting to Brain via ${protocol}//${host}/ws/house`);
             ws = new WebSocket(`${protocol}//${host}/ws/house`);
 
             ws.onopen = () => {
-                console.log("BRAIN CONNECTION ESTABLISHED");
-                statusEl.innerText = "BRAIN ONLINE";
-                statusEl.style.color = "#00FF88";
-                statusEl.style.borderColor = "#00FF88";
+                statusEl.innerText = "Brain Online";
+                statusEl.style.color = "#22c55e";
             };
 
-            ws.onclose = (e) => {
-                console.log("BRAIN DISCONNECTED. RETRYING IN 2S...", e.reason);
-                statusEl.innerText = "BRAIN DISCONNECTED";
-                statusEl.style.color = "#FF1744";
-                statusEl.style.borderColor = "#FF1744";
-                setTimeout(connect, 2000); // Auto-reconnect logic
+            ws.onclose = () => {
+                statusEl.innerText = "Brain Disconnect";
+                statusEl.style.color = "#EF4444";
+                setTimeout(connect, 2000); 
             };
 
-            ws.onerror = (err) => {
-                console.error("BRAIN CONNECTION ERROR:", err);
-                ws.close();
-            };
+            ws.onerror = () => { ws.close(); };
 
             ws.onmessage = (event) => {
                 const msg = JSON.parse(event.data);
-                console.log("BRAIN SIGNAL RECEIVED:", msg);
-                
                 if (msg.type === "INIT") {
                     updateUI(msg.data);
                 } else if (msg.type === "UPDATE") {
-                    const updatedState = { [msg.device]: msg.data };
-                    updateUI(updatedState);
+                    updateUI({ [msg.device]: msg.data });
                 } else if (msg.type === "EMERGENCY") {
                     document.getElementById('emergency-overlay').style.display = 'block';
                     document.getElementById('emergency-text').innerText = "SOS ACTIVE";
@@ -215,22 +221,18 @@
                 room.className = isOff ? 'room' : 'room light-on';
                 document.getElementById('light-text').innerText = data.light.status;
             }
-
             if (data.door) {
                 const isLocked = data.door.status === "LOCKED";
                 const room = document.getElementById('door-room');
                 const icon = room.querySelector('i');
-                
                 room.className = isLocked ? 'room door-locked' : 'room door-unlocked';
                 icon.className = isLocked ? 'fas fa-door-closed' : 'fas fa-door-open';
                 document.getElementById('door-text').innerText = data.door.status;
             }
-
             if (data.temp) {
                 const tempVal = typeof data.temp === 'object' ? data.temp.status : data.temp;
                 document.getElementById('temp-text').innerText = tempVal + "°C";
             }
-
             if (data.fan) {
                 const isOn = data.fan.status === "ON";
                 const room = document.getElementById('climate-room');
@@ -239,7 +241,6 @@
             }
         }
 
-        // Start connection
         connect();
     </script>
 </body>

@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual House Simulator</title>
+    <title>Virtual House Simulator - Light Mode</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #010101;
-            --card-dark: #131314;
-            --cyan-accent: #ffffff;
-            --red-emergency: #ff1717;
             --gold-light: #FFC400;
+            --red-emergency: #FF1744;
         }
 
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-dark);
-            color: rgb(6, 6, 6);
+            background: linear-gradient(180deg, #f8f9fc 0%, #dbe1f1 50%, #b8c5e6 100%);
+            color: #1e293b;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -26,53 +23,68 @@
             min-height: 100vh;
         }
 
-        h1 { color: var(--cyan-accent); margin-bottom: 30px; letter-spacing: 2px; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
+        h1 { 
+            color: #111827; 
+            margin-bottom: 30px; 
+            letter-spacing: 2px; 
+            text-align: center;
+        }
 
         .house-container {
             width: 80%;
             max-width: 900px;
-            background: var(--card-dark);
-            border: 2px solid var(--cyan-accent);
-            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1.5px solid #ffffff;
+            border-radius: 28px;
             padding: 40px;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 30px;
             position: relative;
-            box-shadow: 0 0 70px rgba(12, 12, 12, 0.596);
+            box-shadow: 0 20px 40px rgba(148, 163, 184, 0.25);
+            backdrop-filter: blur(10px);
         }
 
         .room {
-            background: #686866;
-            border-radius: 20px;
-            padding: 20px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 18px;
+            padding: 25px;
             text-align: center;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .room h3 {
+            color: #ffffff;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
         }
 
         /* LIGHT: ON State */
         .room.light-on {
-            background: radial-gradient(circle, #1ddf3d 0%, #1C222D 100%);
+            background: radial-gradient(circle, #22c55e 0%, #1e3a8a 100%);
             box-shadow: 0 0 30px var(--gold-light);
             border-color: var(--gold-light);
         }
         .light-on i { color: var(--gold-light) !important; text-shadow: 0 0 20px var(--gold-light); }
 
         /* DOOR: States */
-        .room.door-unlocked i { color: #2C3540 !important; }
-        .room.door-locked i { color: var(--red-emergency) !important; }
+        .room.door-unlocked i { color: #ffffff !important; }
+        .room.door-locked i { color: #ffffff !important; }
 
         /* FAN: Animation */
         .fan-icon { display: inline-block; }
-        .fan-on .fan-icon { animation: spin 1s linear infinite; color: var(--cyan-accent) !important; }
+        .fan-on .fan-icon { animation: spin 1s linear infinite; color: var(--gold-light) !important; }
 
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        .icon-box { font-size: 4rem; margin-bottom: 20px; color: #0a0a0a; }
+        .icon-box { font-size: 3.5rem; margin-bottom: 15px; color: #000000; }
 
         .status-badge {
             display: inline-block;
@@ -80,8 +92,10 @@
             border-radius: 15px;
             font-size: 12px;
             font-weight: bold;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            color: #ffffff;
             margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* Door Animation */
@@ -109,19 +123,21 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #FF1744;
-            background: rgb(183, 183, 183);
-            padding: 10px 20px;
+            background: linear-gradient(135deg, #ffffff, #e2e8f0);
+            padding: 8px 20px;
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 101;
         }
     </style>
 </head>
 <body>
     <div id="emergency-overlay"></div>
-    <div id="ws-status">BRAIN OFFLINE</div>
+    <div id="ws-status">Brain Disconnect</div>
     
     <h1>Virtual House Simulator</h1>
 
@@ -163,26 +179,23 @@
         let ws;
 
         function connect() {
-            // Using explicit 127.0.0.1 to avoid localhost IPv6 resolution issues on some machines
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const host = window.location.host; // This will capture 127.0.0.1:8080 or localhost:8080
+            const host = window.location.host; 
             
             console.log(`Connecting to Brain via ${protocol}//${host}/ws/house`);
             ws = new WebSocket(`${protocol}//${host}/ws/house`);
 
             ws.onopen = () => {
                 console.log("BRAIN CONNECTION ESTABLISHED");
-                statusEl.innerText = "BRAIN ONLINE";
-                statusEl.style.color = "#00FF88";
-                statusEl.style.borderColor = "#00FF88";
+                statusEl.innerText = "Brain Online";
+                statusEl.style.color = "#16a34a";
             };
 
             ws.onclose = (e) => {
                 console.log("BRAIN DISCONNECTED. RETRYING IN 2S...", e.reason);
-                statusEl.innerText = "BRAIN DISCONNECTED";
+                statusEl.innerText = "Brain Disconnect";
                 statusEl.style.color = "#FF1744";
-                statusEl.style.borderColor = "#FF1744";
-                setTimeout(connect, 2000); // Auto-reconnect logic
+                setTimeout(connect, 2000); 
             };
 
             ws.onerror = (err) => {
@@ -239,7 +252,6 @@
             }
         }
 
-        // Start connection
         connect();
     </script>
 </body>
